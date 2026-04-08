@@ -111,3 +111,16 @@ class PayrollSerializer(serializers.ModelSerializer):
             return gross * Decimal('0.10')
         else:
             return gross * Decimal('0.15')
+
+
+class PayrollSummarySerializer(serializers.Serializer):
+    """Payroll Summary Report"""
+    period_start = serializers.DateField()
+    period_end = serializers.DateField()
+    total_employees = serializers.IntegerField()
+    total_gross_salary = serializers.DecimalField(max_digits=12, decimal_places=2)
+    total_overtime_pay = serializers.DecimalField(max_digits=12, decimal_places=2)
+    total_holiday_pay = serializers.DecimalField(max_digits=12, decimal_places=2)
+    total_deductions = serializers.DecimalField(max_digits=12, decimal_places=2)
+    total_net_salary = serializers.DecimalField(max_digits=12, decimal_places=2)
+    average_net_salary = serializers.DecimalField(max_digits=12, decimal_places=2)

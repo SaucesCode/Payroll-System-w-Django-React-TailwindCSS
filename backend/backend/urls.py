@@ -22,7 +22,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from users.views import RegisterView
 from employees.views import EmployeeViewSet
 from attendance.views import AttendanceViewSet, HolidayViewSet
-from payroll.views import PayrollViewSet
+from payroll.views import PayrollViewSet, PayrollSummaryView
 
 router = DefaultRouter()
 router.register(r'employees', EmployeeViewSet)
@@ -38,4 +38,5 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/register/', RegisterView.as_view(), name='register'),
+    path('api/payroll-summary/', PayrollSummaryView.as_view(), name='payroll-summary'),
 ]
