@@ -19,19 +19,23 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-
+from users.views import RegisterView
 from employees.views import EmployeeViewSet
-from attendance.views import AttendanceViewSet
+from attendance.views import AttendanceViewSet, HolidayViewSet
 from payroll.views import PayrollViewSet
 
 router = DefaultRouter()
 router.register(r'employees', EmployeeViewSet)
 router.register(r'attendance', AttendanceViewSet)
+router.register(r'holidays', HolidayViewSet)
 router.register(r'payroll', PayrollViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    
+    # Authentication
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/register/', RegisterView.as_view(), name='register'),
 ]

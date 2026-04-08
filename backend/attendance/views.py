@@ -1,9 +1,40 @@
-from rest_framework import viewsets
-from .models import Attendance
-from .serializers import AttendanceSerializer
+# attendance/views.py
+from rest_framework import viewsets, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
+from .models import Attendance, Holiday
+from .serializers import AttendanceSerializer, HolidaySerializer
+from users.permissions import IsPayrollOfficer, IsOwnerOrPayrollOfficer
+
+class HolidayViewSet(viewsets.ModelViewSet):
+    queryset = Holiday.objects.all()
+    serializer_class = HolidaySerializer
+    permission_classes = [IsAuthenticated, IsPayrollOfficer]  # Only Payroll Officer/Admin can manage holidays
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['date', 'is_recurring']
+    ordering = ['date']
+
 
 class AttendanceViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
     queryset = Attendance.objects.all()
     serializer_class = AttendanceSerializer
+    
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['period_start', 'period_end']
+    ordering_fields = ['period_start', 'period_end', 'employee__last_name']
+    ordering = ['-period_start', '-period_end']
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [IsAuthenticated(), IsOwnerOrPayrollOfficer()]
+        return [IsAuthenticated(), IsPayrollOfficer()]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+
+        if user.is_payroll_officer:
+            return queryset
+        if hasattr(user, 'employee_profile') and user.employee_profile:
+            return queryset.filter(employee=user.employee_profile)
+        return queryset.none()
