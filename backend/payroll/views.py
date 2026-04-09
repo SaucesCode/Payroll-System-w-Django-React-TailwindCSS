@@ -1,6 +1,6 @@
 # payroll/views.py
 from rest_framework import viewsets, filters, status
-from rest_framework.views import APIView   # ← Correct import for APIView
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
@@ -68,12 +68,23 @@ class PayrollSummaryView(APIView):
             period_start=period_start,
             period_end=period_end
         )
-
+  
         if not payrolls.exists():
-            return Response({
-                "error": f"No payroll records found for period {period_start} to {period_end}"
-            }, status=status.HTTP_404_NOT_FOUND)
+            summary_data = {
+                'period_start': period_start,
+                'period_end': period_end,
+                'total_employees': 0,
+                'total_gross_salary': Decimal('0.00'),
+                'total_overtime_pay': Decimal('0.00'),
+                'total_holiday_pay': Decimal('0.00'),
+                'total_deductions': Decimal('0.00'),
+                'total_net_salary': Decimal('0.00'),
+                'average_net_salary': Decimal('0.00'),
+            }
+            serializer = self.serializer_class(summary_data)
+            return Response(serializer.data)
 
+        # If payrolls exist, calculate real summary
         summary = payrolls.aggregate(
             total_employees=Count('employee'),
             total_gross=Sum('gross_salary'),

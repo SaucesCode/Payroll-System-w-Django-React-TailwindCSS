@@ -1,58 +1,48 @@
 // src/App.tsx
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
-
-// Layout
 import MainLayout from "./components/layout/MainLayout";
 
-// // Pages (we'll create these next)
-// import Dashboard from "./pages/Dashboard";
-// import EmployeesPage from "./pages/EmployeesPage";
-// import AttendancePage from "./pages/AttendancePage";
-// import PayrollPage from "./pages/PayrollPage";
+import Dashboard from "./pages/Dashboard";
+import EmployeesPage from "./pages/EmployeesPage";
+import AttendancePage from "./pages/AttendancePage";
+import PayrollPage from "./pages/PayrollPage";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
-      </div>
+      <div className="min-h-screen flex items-center justify-center text-xl">Loading...</div>
     );
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public Route */}
-          <Route path="/login" element={<Login />} />
+      <Routes>
+        <Route path="/login" element={<Login />} />
 
-          {/* Protected Routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <MainLayout />
-              </ProtectedRoute>
-            }
-          >
-            {/* <Route index element={<Dashboard />} />
-            <Route path="employees" element={<EmployeesPage />} />
-            <Route path="attendance" element={<AttendancePage />} />
-            <Route path="payroll" element={<PayrollPage />} /> */}
-          </Route>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="employees" element={<EmployeesPage />} />
+          <Route path="attendance" element={<AttendancePage />} />
+          <Route path="payroll" element={<PayrollPage />} />
+        </Route>
 
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </Router>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </AuthProvider>
   );
 }

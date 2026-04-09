@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import api from "../api/axios";
 import type { User, AuthResponse, LoginCredentials } from "../types";
+import { showToast } from "../utils/toast";
 
 interface AuthContextType {
   user: User | null;
@@ -21,7 +22,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
-      // TODO: Fetch user profile later
       setIsAuthenticated(true);
     }
     setIsLoading(false);
@@ -34,11 +34,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem("access_token", response.data.access);
       localStorage.setItem("refresh_token", response.data.refresh);
 
-      // TODO: Fetch user details later
       setIsAuthenticated(true);
-      window.location.href = "/"; // redirect to dashboard
-    } catch (error) {
-      console.error("Login failed:", error);
+      showToast.success("Login successful! Welcome back.");
+      window.location.href = "/";
+    } catch (error: any) {
+      showToast.error(error.response?.data?.detail || "Invalid username or password");
       throw error;
     }
   };
@@ -48,6 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("refresh_token");
     setUser(null);
     setIsAuthenticated(false);
+    showToast.success("Logged out successfully");
     window.location.href = "/login";
   };
 
